@@ -1,11 +1,11 @@
+
 class Piece:
-    def __init__(self, type_, color):
-        self.type = type_
+    def __init__(self, color):
         self.color = color
     def __str__(self):
-        name = ''
-        name += self.color.value[0]
-        name += '-'
-        name += self.type.value[0:2]
-        return name
+        return 1
+    def type(self):
+        return type(self).__name__
+
+
         
