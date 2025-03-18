@@ -31,4 +31,5 @@ class Board:
     def checkLegalMoves(self,row,col):
         piece = self.pieces[row][col]
         legalMoves = piece.calcMoves(row, col, self.pieces)
+        return legalMoves
         

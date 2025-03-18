@@ -1,6 +1,11 @@
 from models.Board import Board
+from models.Bishop import Bishop
 from models.Pawn import Pawn
-from models.Piece import Piece
+from models.Knight import Knight
+from models.King import King
+from models.Rook import Rook
+from models.Queen import Queen
+from models.Color import Color
 from models.Type import Type
 from models.Color import Color
 import pygame
@@ -49,6 +54,7 @@ dragging = False
 selectedPiece = None
 lastX, lastY = 0, 0
 clock = pygame.time.Clock()
+legalMoves = None
 while running:
     clock.tick(60)
 
@@ -58,24 +64,57 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
-            x = pos[0] // SQUARE_SIZE
-            y = pos[1] // SQUARE_SIZE
-            selectedPiece = mainBoard.pieces[y][x]
-            lastX = x
-            lastY = y
-            mainBoard.checkLegalMoves(y,x)
+            col = pos[0] // SQUARE_SIZE
+            row = pos[1] // SQUARE_SIZE
+            selectedPiece = mainBoard.pieces[row][col]
+            lastX = col
+            lastY = row
+            legalMoves = mainBoard.checkLegalMoves(row,col)
             if selectedPiece != None:
                 dragging = True
-                mainBoard.pieces[y][x] = None
+                mainBoard.pieces[row][col] = None
 
 
         if event.type == pygame.MOUSEBUTTONUP and dragging:
             pos = pygame.mouse.get_pos()
-            x = pos[0] // SQUARE_SIZE
-            y = pos[1] // SQUARE_SIZE
+            col = pos[0] // SQUARE_SIZE
+            row = pos[1] // SQUARE_SIZE
 
-            if 0 <= x < 8 and 0 <= y < 8 and (x != lastX or y != lastY):
-                mainBoard.pieces[y][x] = selectedPiece
+            target = (row, col)
+            isEnPassant = None
+            selectedMove = None
+            for move, enPassant in legalMoves:
+                if move == target:
+                    selectedMove = move
+                    isEnPassant = enPassant
+
+            #make move
+            if 0 <= col < 8 and 0 <= row < 8 and (col != lastX or row != lastY) and selectedMove:
+                #special behavior for pawn
+                if type(selectedPiece) is Pawn:
+                    if selectedPiece.passant:
+                        selectedPiece.passant = False
+
+                    if isEnPassant == "setPassant":
+                        selectedPiece.passant = True
+
+                    if isEnPassant is True:
+                        capturedRow = row -1 if selectedPiece.color == Color.Black else row + 1
+                        mainBoard.pieces[capturedRow][col] = None
+
+                    if row == 0:
+                        selectedPiece = Queen(Color.White)
+                    elif row == 7:
+                        selectedPiece = Queen(Color.Black)
+
+
+
+
+
+
+
+                #move the piece
+                mainBoard.pieces[row][col] = selectedPiece
             else:
                 mainBoard.pieces[lastY][lastX] = selectedPiece
             dragging = False
