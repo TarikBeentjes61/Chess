@@ -12,6 +12,16 @@ import pygame
 
 mainBoard = Board()
 
+turn = Color.White
+def swapTurns(turn):
+    global mainBoard
+    for row in mainBoard.pieces:
+        for piece in row:
+            if isinstance(piece, Pawn) and piece.color != turn:
+                piece.passant = False
+
+    return Color.Black if turn == Color.White else Color.White
+
 pygame.init()
 
 WIDTH, HEIGHT = 800, 800
@@ -69,10 +79,13 @@ while running:
             selectedPiece = mainBoard.pieces[row][col]
             lastX = col
             lastY = row
-            legalMoves = mainBoard.checkLegalMoves(row,col)
-            if selectedPiece != None:
-                dragging = True
-                mainBoard.pieces[row][col] = None
+            if selectedPiece is not None and selectedPiece.color == turn:
+                legalMoves = mainBoard.checkLegalMoves(row,col)
+                if selectedPiece != None:
+                    dragging = True
+                    mainBoard.pieces[row][col] = None
+
+
 
 
         if event.type == pygame.MOUSEBUTTONUP and dragging:
@@ -107,14 +120,9 @@ while running:
                     elif row == 7:
                         selectedPiece = Queen(Color.Black)
 
-
-
-
-
-
-
                 #move the piece
                 mainBoard.pieces[row][col] = selectedPiece
+                turn = swapTurns(turn)
             else:
                 mainBoard.pieces[lastY][lastX] = selectedPiece
             dragging = False
@@ -127,6 +135,15 @@ while running:
         pos = pygame.mouse.get_pos()
         img = piece_images[(selectedPiece.color.value.lower(), selectedPiece.type())]
         win.blit(img, (pos[0] - SQUARE_SIZE // 2, pos[1] - SQUARE_SIZE // 2))
+    
+    if legalMoves is not None:
+        for move in legalMoves:
+            move_row, move_col = move[0]
+            pygame.draw.circle(win, (0, 255, 0),  # Green color
+                            (move_col * SQUARE_SIZE + SQUARE_SIZE // 2,  # X position
+                                move_row * SQUARE_SIZE + SQUARE_SIZE // 2),  # Y position
+                            SQUARE_SIZE // 4)  # Radius of the highlight
+    
 
     pygame.display.update()
 
