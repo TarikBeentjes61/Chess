@@ -34,6 +34,7 @@ class Pawn(Piece):
                 if type(board[row][col+z]) is Pawn and board[row][col+z].passant is True and board[row+(direction)][col+z] is None:
                     if self.checkColor(board[row][col+z]):
                         legalMoves.append(((row+(direction), col+z), True))
+        print(legalMoves)
         return legalMoves
     
     def checkColor(self, piece):

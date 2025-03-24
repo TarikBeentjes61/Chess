@@ -62,6 +62,8 @@ def draw_pieces():
 running = True
 dragging = False
 selectedPiece = None
+selectedRow = None
+selectedCol = None
 lastX, lastY = 0, 0
 clock = pygame.time.Clock()
 legalMoves = None
@@ -77,6 +79,8 @@ while running:
             col = pos[0] // SQUARE_SIZE
             row = pos[1] // SQUARE_SIZE
             selectedPiece = mainBoard.pieces[row][col]
+            selectedRow = row
+            selectedCol = col
             lastX = col
             lastY = row
             if selectedPiece is not None and selectedPiece.color == turn:
@@ -122,6 +126,7 @@ while running:
 
                 #move the piece
                 mainBoard.pieces[row][col] = selectedPiece
+                mainBoard.pieces[selectedRow][selectedCol] = None
                 turn = swapTurns(turn)
             else:
                 mainBoard.pieces[lastY][lastX] = selectedPiece
