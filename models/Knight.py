@@ -1,6 +1,7 @@
 from models.Piece import Piece
 class Knight(Piece):
     def calcMoves(self, row, col, board):
+        pieces = board.pieces
         legalMoves = []
         oppositeColor = self.color.opposite()
         moves = [
@@ -14,9 +15,9 @@ class Knight(Piece):
             newY = row+y
             newX = col+x
 
-            if newY >= 0 and newY < len(board) and newX >= 0 and newX < len(board):
-                piece = board[newY][newX]
+            if newY >= 0 and newY < len(pieces) and newX >= 0 and newX < len(pieces):
+                piece = pieces[newY][newX]
                 if piece is None or piece.color == oppositeColor:
-                    legalMoves.append(((newY, newX), False))
+                    legalMoves.append(((newY, newX), "attack"))
 
         return legalMoves
