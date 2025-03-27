@@ -19,8 +19,10 @@ class Pawn(Piece):
 
             if 0 <= newRow < len(pieces):
                 if pieces[newRow][col] is None:
-                    setPassant = False if i == 1 else "setPassant"
-                    legalMoves.append(((newRow, col), setPassant))
+                    flag = False if i == 1 else "setPassant"
+                    if newRow == 0 or newRow == 7:
+                        flag = "promotion"
+                    legalMoves.append(((newRow, col), flag))
                 else:
                     break
             else:

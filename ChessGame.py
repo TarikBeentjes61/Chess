@@ -2,6 +2,7 @@ import pygame
 import pygame.gfxdraw
 from models.Board import Board
 from models.Type import Type
+from models.Bob import Bob
 
 class ChessGame:
     def __init__(self):
@@ -19,6 +20,7 @@ class ChessGame:
         self.running = True
         self.dragging = False
         self.lastX, self.lastY = 0, 0
+        self.bob = Bob()
         self.mainBoard = Board()
         self.load_piece_images()
         self.board_surface = pygame.Surface((self.WIDTH, self.HEIGHT))
@@ -119,10 +121,11 @@ class ChessGame:
             move_row * self.SQUARE_SIZE + self.SQUARE_SIZE // 2,
             self.SQUARE_SIZE // 2,
             self.RED)
-
+        
     def run(self):
         while self.running:
             self.clock.tick(60)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -131,6 +134,7 @@ class ChessGame:
                 elif event.type == pygame.MOUSEBUTTONUP:
                     self.handle_mouse_up(pygame.mouse.get_pos())
 
+            #update the board and draw pieces
             self.win.blit(self.board_surface, (0, 0))
             if self.mainBoard.check:
                 self.highlight_check()
@@ -139,6 +143,7 @@ class ChessGame:
                 self.highlight_moves()
             if self.dragging and self.mainBoard.selectedPiece:
                 self.handle_mouse_drag()
+
             pygame.display.update()
 
         pygame.quit()

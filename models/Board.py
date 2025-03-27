@@ -14,8 +14,9 @@ class Board:
         self.check = False
         self.color = Color.White
         self.bob = Bob()
+        self.moveCount = 0
         self.setLegalMoves()
-
+        self.count = 0
     def baseBoard(self):
             board = []
             board.append([
@@ -39,26 +40,28 @@ class Board:
         piece = self.pieces[start_row][start_col]
         self.selectedPiece = piece
 
-        if piece == None:
+        if piece is None:
             return
-        
+
         captured_piece = self.pieces[end_row][end_col]
 
         if isinstance(piece, Rook):
             piece.hasMoved = True
+
         if isinstance(piece, King):
             if flag == "castleQueen":
                 rook = self.pieces[end_row][0]
-                self.pieces[end_row][end_col+1] = rook
-                self.pieces[end_row][0] = None
-                rook.hasMoved = True
-                self.move_history.append((piece, start_row, start_col, end_row, end_col, captured_piece, flag))
+                if isinstance(rook, Rook): 
+                    self.pieces[end_row][end_col+1] = rook
+                    self.pieces[end_row][0] = None 
+                    rook.hasMoved = True
             elif flag == "castleKing":
-                rook = self.pieces[end_row][7]
-                self.pieces[end_row][end_col-1] = rook
-                self.pieces[end_row][7] = None
-                rook.hasMoved = True
-                self.move_history.append((piece, start_row, start_col, end_row, end_col, captured_piece, flag))
+                rook = self.pieces[end_row][7] 
+                if isinstance(rook, Rook): 
+                    self.pieces[end_row][end_col-1] = rook  
+                    self.pieces[end_row][7] = None 
+                    rook.hasMoved = True
+                    piece.castled = True
             piece.hasMoved = True
 
         if isinstance(piece, Pawn):
@@ -70,13 +73,11 @@ class Board:
                 capturedRow = end_row - 1 if piece.color == Color.Black else end_row + 1
                 captured_piece = self.pieces[capturedRow][end_col]
                 self.pieces[capturedRow][end_col] = None
-
-            if end_row == 0 or end_row == 7: #promotion
+            if flag == "promotion":
                 piece = Queen(piece.color)
 
         self.pieces[start_row][start_col] = None
         self.pieces[end_row][end_col] = piece
-
 
         self.move_history.append((piece, start_row, start_col, end_row, end_col, captured_piece, flag))
 
@@ -94,41 +95,56 @@ class Board:
         self.pieces[start_row][start_col] = piece
         self.pieces[end_row][end_col] = captured_piece
 
-        if flag == "castleQueen":
-            rook = self.pieces[end_row][end_col+1]
-            self.pieces[end_row][0] = rook 
-            self.pieces[end_row][end_col+1] = None
-            rook.hasMoved = False
-        elif flag == "castleKing":
-            rook = self.pieces[end_row][end_col-1]
-            self.pieces[end_row][7] = rook
-            self.pieces[end_row][end_col-1] = None
-            rook.hasMoved = False
-
-        if flag == "passant":
-            capturedRow = end_row -1 if piece.color == Color.Black else end_row + 1
-            self.pieces[capturedRow][end_col] = captured_piece
-
-        if end_row == 0 or end_row == 7: 
-            self.pieces[end_row][end_col] = Queen(piece.color)
-            piece = self.pieces[end_row][end_col] 
-
-        if isinstance(piece, (King, Rook)):
+        if isinstance(piece, King):
+            if flag == "castleQueen":
+                if start_row == 0 or start_row == 7:
+                    self.pieces[start_row][start_col] = piece
+                    self.pieces[end_row][end_col+1] = None
+                    self.pieces[start_row][0] = Rook(piece.color)
+                    piece.castled = False
+            elif flag == "castleKing":
+                if start_row == 0 or start_row == 7:
+                    self.pieces[start_row][start_col] = piece
+                    self.pieces[end_row][end_col-1] = None
+                    self.pieces[start_row][7] = Rook(piece.color)
+                    piece.castled = False
             piece.hasMoved = False
+        if isinstance(piece, Rook):
+            piece.hasMoved = False
+        if flag == "passant":
+            capturedRow = end_row - 1 if piece.color == Color.Black else end_row + 1
+            if captured_piece: 
+                self.pieces[capturedRow][end_col] = captured_piece
+
+        if flag == "promotion":
+            if captured_piece is not None:
+                self.pieces[end_row][end_col] = captured_piece
+
+            self.pieces[start_row][start_col] = Pawn(piece.color)
+            pass
+
+
     def swap_turns(self):
+        self.move_history = []
         for row in self.pieces:
             for piece in row:
-                if isinstance(piece, Pawn) and piece.color != self.color:
+                if isinstance(piece, Pawn):
                     piece.passant = False
         self.color = Color.Black if self.color == Color.White else Color.White
         self.checkCheck()
         self.setLegalMoves()
 
         if self.color == Color.Black:
-            best_move = self.bob.find_best_move(self, self.bob.depth)
-            start_row, start_col, end_row, end_col, flag = best_move
-            self.move_piece(start_row, start_col, end_row, end_col, flag)
-            self.swap_turns()
+            best_move = self.bob.find_best_move(self, self.bob.depthDeepening(self.moveCount))
+            if best_move:
+                self.moveCount += 1
+                start_row, start_col, end_row, end_col, flag = best_move
+                self.move_piece(start_row, start_col, end_row, end_col, flag)
+                self.swap_turns()
+            elif self.check == False:
+                print("Stalemate")
+            else:
+                print("Checkmate")
         self.selectedPiece = None
 
     def setLegalMoves(self):
@@ -195,6 +211,3 @@ class Board:
             if kingPos == pos[0]:  
                 self.check = True
                 return  
-
-    def checkCheckmate(self):
-        pass
