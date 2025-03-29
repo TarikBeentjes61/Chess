@@ -1,8 +1,10 @@
 import pygame
 import pygame.gfxdraw
+import threading
 from models.Board import Board
 from models.Type import Type
 from models.Bob import Bob
+from models.Color import Color
 
 class ChessGame:
     def __init__(self):
@@ -21,6 +23,9 @@ class ChessGame:
         self.dragging = False
         self.lastX, self.lastY = 0, 0
         self.bob = Bob()
+        self.bob_calculating = False
+        self.bob_thread = None  
+        self.lock = threading.Lock()
         self.mainBoard = Board()
         self.load_piece_images()
         self.board_surface = pygame.Surface((self.WIDTH, self.HEIGHT))
@@ -121,11 +126,19 @@ class ChessGame:
             move_row * self.SQUARE_SIZE + self.SQUARE_SIZE // 2,
             self.SQUARE_SIZE // 2,
             self.RED)
+
+    def calculate_bob_move(self):
+        with self.lock:
+            self.bob_calculating = True
+            best_move = self.bob.find_best_move(self.mainBoard, 4)
+            if best_move:
+                start_row, start_col, end_row, end_col, flag = best_move
+                self.mainBoard.move_piece(start_row, start_col, end_row, end_col, flag)
+                self.mainBoard.swap_turns()
+            self.bob_calculating = False
         
     def run(self):
         while self.running:
-            self.clock.tick(60)
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -134,7 +147,11 @@ class ChessGame:
                 elif event.type == pygame.MOUSEBUTTONUP:
                     self.handle_mouse_up(pygame.mouse.get_pos())
 
-            #update the board and draw pieces
+            if self.mainBoard.color == Color.Black and not self.bob_calculating:
+                if self.bob_thread is None or not self.bob_thread.is_alive():
+                    self.bob_thread = threading.Thread(target=self.calculate_bob_move)
+                    self.bob_thread.start()
+
             self.win.blit(self.board_surface, (0, 0))
             if self.mainBoard.check:
                 self.highlight_check()

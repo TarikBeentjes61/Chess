@@ -9,6 +9,7 @@ from models.Bob import Bob
 class Board:
     def __init__(self):
         self.pieces = self.baseBoard()
+        self.board_state_before_move = None
         self.move_history = []
         self.selectedPiece = None
         self.check = False
@@ -37,49 +38,49 @@ class Board:
             return board
     
     def move_piece(self, start_row, start_col, end_row, end_col, flag):
-        piece = self.pieces[start_row][start_col]
-        self.selectedPiece = piece
+            piece = self.pieces[start_row][start_col]
+            self.selectedPiece = piece
 
-        if piece is None:
-            return
+            if piece is None:
+                return
 
-        captured_piece = self.pieces[end_row][end_col]
+            captured_piece = self.pieces[end_row][end_col]
 
-        if isinstance(piece, Rook):
-            piece.hasMoved = True
+            if isinstance(piece, Rook):
+                piece.hasMoved = True
 
-        if isinstance(piece, King):
-            if flag == "castleQueen":
-                rook = self.pieces[end_row][0]
-                if isinstance(rook, Rook): 
-                    self.pieces[end_row][end_col+1] = rook
-                    self.pieces[end_row][0] = None 
-                    rook.hasMoved = True
-            elif flag == "castleKing":
-                rook = self.pieces[end_row][7] 
-                if isinstance(rook, Rook): 
-                    self.pieces[end_row][end_col-1] = rook  
-                    self.pieces[end_row][7] = None 
-                    rook.hasMoved = True
-                    piece.castled = True
-            piece.hasMoved = True
+            if isinstance(piece, King):
+                if flag == "castleQueen":
+                    rook = self.pieces[end_row][0]
+                    if isinstance(rook, Rook): 
+                        self.pieces[end_row][end_col+1] = rook
+                        self.pieces[end_row][0] = None 
+                        rook.hasMoved = True
+                elif flag == "castleKing":
+                    rook = self.pieces[end_row][7] 
+                    if isinstance(rook, Rook): 
+                        self.pieces[end_row][end_col-1] = rook  
+                        self.pieces[end_row][7] = None 
+                        rook.hasMoved = True
+                        piece.castled = True
+                piece.hasMoved = True
 
-        if isinstance(piece, Pawn):
-            if piece.passant:
-                piece.passant = False
-            if flag == "setPassant":
-                piece.passant = True
-            if flag == "passant":
-                capturedRow = end_row - 1 if piece.color == Color.Black else end_row + 1
-                captured_piece = self.pieces[capturedRow][end_col]
-                self.pieces[capturedRow][end_col] = None
-            if flag == "promotion":
-                piece = Queen(piece.color)
+            if isinstance(piece, Pawn):
+                if piece.passant:
+                    piece.passant = False
+                if flag == "setPassant":
+                    piece.passant = True
+                if flag == "passant":
+                    capturedRow = end_row - 1 if piece.color == Color.Black else end_row + 1
+                    captured_piece = self.pieces[capturedRow][end_col]
+                    self.pieces[capturedRow][end_col] = None
+                if flag == "promotion":
+                    piece = Queen(piece.color)
 
-        self.pieces[start_row][start_col] = None
-        self.pieces[end_row][end_col] = piece
+            self.pieces[start_row][start_col] = None
+            self.pieces[end_row][end_col] = piece
 
-        self.move_history.append((piece, start_row, start_col, end_row, end_col, captured_piece, flag))
+            self.move_history.append((piece, start_row, start_col, end_row, end_col, captured_piece, flag))
 
     def undo_move(self):
         if not self.move_history:
@@ -121,9 +122,7 @@ class Board:
                 self.pieces[end_row][end_col] = captured_piece
 
             self.pieces[start_row][start_col] = Pawn(piece.color)
-            pass
-
-
+        
     def swap_turns(self):
         self.move_history = []
         for row in self.pieces:
@@ -133,18 +132,6 @@ class Board:
         self.color = Color.Black if self.color == Color.White else Color.White
         self.checkCheck()
         self.setLegalMoves()
-
-        if self.color == Color.Black:
-            best_move = self.bob.find_best_move(self, self.bob.depthDeepening(self.moveCount))
-            if best_move:
-                self.moveCount += 1
-                start_row, start_col, end_row, end_col, flag = best_move
-                self.move_piece(start_row, start_col, end_row, end_col, flag)
-                self.swap_turns()
-            elif self.check == False:
-                print("Stalemate")
-            else:
-                print("Checkmate")
         self.selectedPiece = None
 
     def setLegalMoves(self):
