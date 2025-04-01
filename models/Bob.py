@@ -12,17 +12,12 @@ class Bob:
             "Queen": 900,
             "King": 2000
         }
+        self.depth = 3
         self.whiteScore = 0
         self.blackScore = 0
         self.color = Color.Black
         self.chessEvaluator = ChessEvaluator()
 
-    def depthDeepening(self, moveCount):
-        if moveCount == 0:
-            return 4
-        else:
-            return 4
-    
     def calcMaterial(self, board):
         material = 0
         piece_values = self.piece_values
@@ -109,7 +104,7 @@ class Bob:
                                 break
             return min_eval
 
-    def find_best_move(self, board, depth):
+    def find_best_move(self, board):
         best_move = None
         alpha = -math.inf
         beta = math.inf
@@ -121,14 +116,13 @@ class Bob:
                         move_coords, move_type = move
                         moveRow, moveCol = move_coords
                         board.move_piece(r, c, moveRow, moveCol, move_type)
-                        score = self.alpha_beta(board, depth-1, alpha, beta, Color.White)
+                        score = self.alpha_beta(board, self.depth-1, alpha, beta, Color.White)
                         board.undo_move()
 
                         if score < best_score:
                             best_score = score
                             best_move = (r, c, moveRow, moveCol, move_type)
                         beta = min(beta, best_score)
-        print(best_move)
         return best_move
 
     def is_square_attacked(self, row, col, attacking_color, board):

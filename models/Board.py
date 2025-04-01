@@ -15,7 +15,6 @@ class Board:
         self.check = False
         self.color = Color.White
         self.bob = Bob()
-        self.moveCount = 0
         self.setLegalMoves()
         self.count = 0
     def baseBoard(self):
