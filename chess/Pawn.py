@@ -1,5 +1,5 @@
-from models.Piece import Piece
-from models.Color import Color
+from chess.Piece import Piece
+from chess.Color import Color
 
 class Pawn(Piece):
     def __init__(self, color):

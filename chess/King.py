@@ -1,5 +1,5 @@
-from models.Piece import Piece
-from models.Rook import Rook
+from chess.Piece import Piece
+from chess.Rook import Rook
 class King(Piece):
     def __init__(self, color):
         super().__init__(color)

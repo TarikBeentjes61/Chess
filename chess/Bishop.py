@@ -1,4 +1,4 @@
-from models.Piece import Piece
+from chess.Piece import Piece
 class Bishop(Piece):
     def calcMoves(self, row, col, board):
         pieces = board.pieces

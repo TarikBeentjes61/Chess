@@ -1,5 +1,5 @@
-from models.Color import Color
-from models.ChessEvaluator import ChessEvaluator
+from chess.Color import Color
+from chess.ChessEvaluator import ChessEvaluator
 import math
 
 class Bob:

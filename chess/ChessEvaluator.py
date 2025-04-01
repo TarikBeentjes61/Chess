@@ -1,4 +1,4 @@
-from models.Color import Color
+from chess.Color import Color
 class ChessEvaluator:
     def __init__(self):
         #Tables based of https://www.chessprogramming.org/Simplified_Evaluation_Function

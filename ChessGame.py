@@ -1,9 +1,9 @@
 import pygame
 import pygame.gfxdraw
 import threading
-from models.Board import Board
-from models.Type import Type
-from models.Bob import Bob
+from chess.Board import Board
+from chess.Type import Type
+from chess.Bob import Bob
 
 class ChessGame:
     def __init__(self):

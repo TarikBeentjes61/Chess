@@ -1,11 +1,11 @@
-from models.Bishop import Bishop
-from models.Pawn import Pawn
-from models.Knight import Knight
-from models.King import King
-from models.Rook import Rook
-from models.Queen import Queen
-from models.Color import Color
-from models.Bob import Bob
+from chess.Bishop import Bishop
+from chess.Pawn import Pawn
+from chess.Knight import Knight
+from chess.King import King
+from chess.Rook import Rook
+from chess.Queen import Queen
+from chess.Color import Color
+from chess.Bob import Bob
 class Board:
     def __init__(self):
         self.pieces = self.baseBoard()
